@@ -1,0 +1,118 @@
+#include <dht11.h>
+#define DHT11PIN A5
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(10,8,7,6,2,1);
+
+dht11 DHT11;
+
+
+const int trig1   = 12;
+const int echo1   = 11; 
+const int distance1 = 22;
+const int ledPin1 = 13;
+
+const int trig2   = 4;
+const int echo2   = 5; 
+const int distance2 = 15;
+const int buzzer1 = 9;
+
+int buzzer = 3;
+int smokeA0 = A0;
+// Your threshold value
+int sensorThres = 250;
+
+float d_us1, d_cm1;
+float d_us2, d_cm2;
+int c = 0;
+
+void setup() {
+  //Serial.begin (9600); 
+    lcd.begin(16, 2);
+  // Print a message to the LCD.
+  lcd.print("hello, world!");
+     
+  
+ 
+       
+  pinMode(trig1, OUTPUT);   
+  pinMode(echo1, INPUT);    
+  pinMode(buzzer, OUTPUT); 
+  pinMode(trig2, OUTPUT);   
+  pinMode(echo2, INPUT);
+  pinMode(ledPin1, OUTPUT);
+  pinMode(buzzer1, OUTPUT);
+  
+}
+
+void loop() {
+    
+  //Serial.println();
+  lcd.setCursor(0, 0);
+
+  int chk = DHT11.read(DHT11PIN);
+
+  lcd.print("Humidity : ");
+  lcd.println((float)DHT11.humidity, 2);
+  delay(1000);
+  //lcd.clear();
+  delay(1000);
+  
+  lcd.setCursor(0, 1);
+  lcd.print("Temperature:");
+  lcd.println((float)DHT11.temperature, 2);
+  delay(1000);
+  lcd.clear();
+  delay(1000);
+
+  
+ // digitalWrite(13, LOW);
+  digitalWrite(trig1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig1, LOW);
+  d_us1 = pulseIn(echo1, HIGH);
+  d_cm1 =(d_us1/2)*0.0343;
+  
+  if(d_cm1 < distance1){
+    digitalWrite(13, HIGH);
+   
+  
+  }
+  if(d_cm1 > 22 && d_cm1 < 28){digitalWrite(13, LOW);}
+  //  Serial.print(d_cm1);
+
+  digitalWrite(trig2, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig2, LOW);
+  d_us2 = pulseIn(echo2, HIGH);
+  d_cm2 =(d_us2/2)*0.0343;
+   if(d_cm2 < distance2){
+    lcd.clear();
+    lcd.print("BHAGAT SINGH");
+    delay(2000);
+    if(d_cm2 < 8){
+      digitalWrite(9, HIGH);
+     
+      //delay(100);
+    }  
+  }
+    else{
+      digitalWrite(9, LOW);
+    }
+
+
+  int analogSensor = analogRead(smokeA0);
+
+  //Serial.print("Pin A0: ");
+  //Serial.println(analogSensor);
+  // Checks if it has reached the threshold value
+  if (analogSensor > sensorThres)
+  {
+
+    //digitalWrite(3,HIGH);
+  
+    
+  tone(buzzer,450);
+  delay(3000); 
+  noTone(buzzer);
+  delay(500);}
+}
